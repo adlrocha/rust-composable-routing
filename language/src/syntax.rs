@@ -36,7 +36,7 @@ impl Node for Str{
     }
 }
 
-pub fn marshal(n: Box<dyn Node>) -> Result<Vec<u8>> {
+pub fn marshal<N: Node>(n: &N) -> Result<Vec<u8>> {
     n.marshal_cbor()
 }
 
@@ -65,8 +65,7 @@ mod tests {
     #[test]
     fn e2e_bool(){
         let a = Bool(true);
-        // let bytes = a.marshal_cbor().unwrap(); // TODO: Add ? instead of unwrap
-        let bytes = marshal(Box::new(a)).unwrap();
+        let bytes = marshal(&a).unwrap();
         let des = unmarshal(&bytes).unwrap();
         let out: &Bool = match des.as_any().downcast_ref::<Bool>(){
             Some(b) => b,
@@ -78,14 +77,12 @@ mod tests {
     #[test]
     fn e2e_str(){
         let a = Str(String::from("testing"));
-        // let bytes = a.marshal_cbor().unwrap(); // TODO: Add ? instead of unwrap
-        let bytes = marshal(Box::new(a)).unwrap();
+        let bytes = marshal(&a).unwrap();
         let des = unmarshal(&bytes).unwrap();
         let out: &Str = match des.as_any().downcast_ref::<Str>(){
             Some(b) => b,
             None => panic!("Not Str Type")
         };
-        // assert_eq!(&Str(String::from("testing")), out);
         assert_eq!(&a, out);
     }
 }
